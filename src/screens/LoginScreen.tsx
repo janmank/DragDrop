@@ -1,16 +1,13 @@
-import {Button, Text} from '@gluestack-ui/themed';
 import {ScreenWrapper} from '../components/layout';
-import {useDispatch} from 'react-redux';
-import {guestLogin} from '../redux/actions/auth';
+import {LoginComponent} from '../components';
+import {View} from '@gluestack-ui/themed';
 
 const LoginScreen = () => {
-  const dispatch = useDispatch();
   return (
-    <ScreenWrapper>
-      <Text>LoginScreen</Text>
-      <Button h="$12" onPress={() => dispatch(guestLogin())}>
-        <Text>Login</Text>
-      </Button>
+    <ScreenWrapper backgroundColor="#1F2937">
+      <View flex={1} justifyContent="space-between" alignItems="center" px="$8">
+        <LoginComponent />
+      </View>
     </ScreenWrapper>
   );
 };
