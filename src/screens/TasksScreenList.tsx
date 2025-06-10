@@ -1,71 +1,76 @@
-import {Box, VStack, Text, Input, InputField} from '@gluestack-ui/themed';
+import {Box, Input, InputField} from '@gluestack-ui/themed';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {HomeStackParamList} from '../stacks/AppStack';
 import {ScreenWrapper} from '../components/layout';
-import {CustomButton, Header} from '../components/shared';
+import {CustomButton, EmptyList, Header} from '../components/shared';
 import {useState} from 'react';
 import {ITask} from '../interfaces';
 import {TaskTile} from '../components';
+import {useDispatch, useSelector} from 'react-redux';
+import {addTask, deleteTask, toggleTask} from '../redux/actions/projects';
+import {selectTasks} from '../redux/selectors/projects';
+import {FlatList} from 'react-native';
 
 const TasksListScreen = () => {
   const {params} = useRoute<RouteProp<HomeStackParamList, 'TasksListScreen'>>();
   const {project} = params;
-
-  const [tasks, setTasks] = useState<ITask[]>([]);
   const [taskName, setTaskName] = useState<string>('');
+  const dispatch = useDispatch();
+  const tasksRedux = useSelector(selectTasks(project.id));
 
-  const addTask = () => {
+  const handleAddTask = () => {
     if (taskName.trim()) {
-      setTasks([
-        ...tasks,
-        {
-          name: taskName,
-          id: Date.now().toString() + Math.random().toString(36).slice(2),
-          completed: false,
-        },
-      ]);
+      const newTask: ITask = {
+        name: taskName,
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        completed: false,
+      };
+      dispatch(addTask(project.id, newTask));
       setTaskName('');
     }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(p => p.id !== id));
+  const handleDeleteTask = (id: string) => {
+    dispatch(deleteTask(project.id, id));
   };
 
-  const toggleTask = (id: string) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? {...task, completed: !task.completed} : task,
-      ),
-    );
+  const handleToggleTask = (id: string) => {
+    dispatch(toggleTask(project.id, id));
   };
 
   return (
     <ScreenWrapper>
       <Header title={project.name + ' tasks'} />
       <Box flex={1} p="$4">
-        <Input borderColor="#C8C8C8" borderRadius="$lg" mb="$4">
-          <InputField
-            value={taskName}
-            onChangeText={setTaskName}
-            placeholder="Enter task name..."
-          />
-        </Input>
-        <CustomButton title={'Add Task'} onPress={addTask} />
-        <VStack space="sm" mt="$6">
-          {tasks.length > 0 ? (
-            tasks.map(task => (
-              <TaskTile
-                key={task.id}
-                task={task}
-                deleteTask={deleteTask}
-                toggleTask={toggleTask}
-              />
-            ))
-          ) : (
-            <Text color="$gray500">No Tasks</Text>
+        <Box pb="$4">
+          <Input borderColor="#C8C8C8" borderRadius="$lg" mb="$4">
+            <InputField
+              value={taskName}
+              onChangeText={setTaskName}
+              placeholder="Enter task name..."
+            />
+          </Input>
+          <CustomButton title={'Add Task'} onPress={handleAddTask} />
+        </Box>
+        <FlatList
+          data={tasksRedux}
+          keyExtractor={task => task.id}
+          renderItem={task => (
+            <TaskTile
+              task={task.item as ITask}
+              deleteTask={handleDeleteTask}
+              toggleTask={handleToggleTask}
+            />
           )}
-        </VStack>
+          showsVerticalScrollIndicator={false}
+          // eslint-disable-next-line react-native/no-inline-styles
+          contentContainerStyle={{
+            gap: 16,
+            paddingBottom: 16,
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={<EmptyList title={'tasks'} />}
+        />
       </Box>
     </ScreenWrapper>
   );

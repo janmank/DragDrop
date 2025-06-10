@@ -6,6 +6,7 @@ import {RootNavigator} from './navigation';
 import {Provider} from 'react-redux';
 import Store from './redux/store';
 import config from '../gluestack.config';
+import './ReactotronConfig';
 
 function App(): React.JSX.Element {
   return (
