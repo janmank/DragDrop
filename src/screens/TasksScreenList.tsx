@@ -3,13 +3,20 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {HomeStackParamList} from '../stacks/AppStack';
 import {ScreenWrapper} from '../components/layout';
 import {CustomButton, EmptyList, Header} from '../components/shared';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {ITask} from '../interfaces';
 import {TaskTile} from '../components';
 import {useDispatch, useSelector} from 'react-redux';
-import {addTask, deleteTask, toggleTask} from '../redux/actions/projects';
+import {
+  addTask,
+  deleteTask,
+  reorderTasks,
+  toggleTask,
+} from '../redux/actions/projects';
 import {selectTasks} from '../redux/selectors/projects';
-import {FlatList} from 'react-native';
+import DraggableFlatList, {
+  RenderItemParams,
+} from 'react-native-draggable-flatlist';
 
 const TasksListScreen = () => {
   const {params} = useRoute<RouteProp<HomeStackParamList, 'TasksListScreen'>>();
@@ -17,6 +24,16 @@ const TasksListScreen = () => {
   const [taskName, setTaskName] = useState<string>('');
   const dispatch = useDispatch();
   const tasksRedux = useSelector(selectTasks(project.id));
+  const [tasksReduxState, setTasksReduxState] = useState(tasksRedux);
+
+  useEffect(() => {
+    setTasksReduxState(tasksRedux);
+  }, [tasksRedux]);
+
+  const handleDragEnd = ({data}: {data: ITask[]}) => {
+    setTasksReduxState(data);
+    dispatch(reorderTasks(project.id, data));
+  };
 
   const handleAddTask = () => {
     if (taskName.trim()) {
@@ -40,7 +57,7 @@ const TasksListScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Header title={project.name + ' tasks'} />
+      <Header title={project.name} />
       <Box flex={1} p="$4">
         <Box pb="$4">
           <Input borderColor="#C8C8C8" borderRadius="$lg" mb="$4">
@@ -52,24 +69,27 @@ const TasksListScreen = () => {
           </Input>
           <CustomButton title={'Add Task'} onPress={handleAddTask} />
         </Box>
-        <FlatList
-          data={tasksRedux}
-          keyExtractor={task => task.id}
-          renderItem={task => (
+        <DraggableFlatList
+          data={tasksReduxState}
+          keyExtractor={item => item.id}
+          onDragEnd={handleDragEnd}
+          renderItem={({item, drag, isActive}: RenderItemParams<ITask>) => (
             <TaskTile
-              task={task.item as ITask}
+              task={item}
               deleteTask={handleDeleteTask}
               toggleTask={handleToggleTask}
+              onLongPress={drag}
+              isActive={isActive}
             />
           )}
+          ListEmptyComponent={<EmptyList title={'tasks'} />}
           showsVerticalScrollIndicator={false}
           // eslint-disable-next-line react-native/no-inline-styles
           contentContainerStyle={{
             gap: 16,
-            paddingBottom: 16,
+            paddingBottom: 110,
             flexGrow: 1,
           }}
-          ListEmptyComponent={<EmptyList title={'tasks'} />}
         />
       </Box>
     </ScreenWrapper>
