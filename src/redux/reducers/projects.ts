@@ -3,6 +3,7 @@ import {
   ADD_TASK,
   DELETE_PROJECT,
   DELETE_TASK,
+  REORDER_TASKS,
   SET_PROJECTS,
   TOGGLE_TASK,
 } from '../actions/projects';
@@ -73,7 +74,15 @@ function projectsReducer(
     }
     case SET_PROJECTS:
       return {...state, projects: action.payload};
-
+    case REORDER_TASKS:
+      return {
+        ...state,
+        projects: state.projects.map(project =>
+          project.id === action.payload.projectId
+            ? {...project, tasks: action.payload.tasks}
+            : project,
+        ),
+      };
     default:
       return state;
   }

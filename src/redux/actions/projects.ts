@@ -7,6 +7,7 @@ export const ADD_TASK = 'ADD_TASK';
 export const DELETE_TASK = 'DELETE_TASK';
 export const TOGGLE_TASK = 'TOGGLE_TASK';
 export const SET_PROJECTS = 'SET_PROJECTS';
+export const REORDER_TASKS = 'REORDER_TASKS';
 
 export const addProject = (project: IProject) => ({
   type: ADD_PROJECT,
@@ -36,4 +37,9 @@ export const toggleTask = (projectId: string, taskId: string) => ({
 export const setProjects = (projects: IProject[]) => ({
   type: SET_PROJECTS,
   payload: projects,
+});
+
+export const reorderTasks = (projectId: string, tasks: ITask[]) => ({
+  type: REORDER_TASKS,
+  payload: {projectId, tasks},
 });
