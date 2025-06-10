@@ -7,6 +7,6 @@ export interface IProject {
 
 export interface ITask {
   name: string;
-  id: number;
+  id: string;
   completed: boolean;
 }
