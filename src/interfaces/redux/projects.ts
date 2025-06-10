@@ -7,6 +7,7 @@ import {
   TOGGLE_TASK,
   SET_PROJECTS,
   REORDER_TASKS,
+  RENAME_PROJECT,
 } from '../../redux/actions/projects';
 
 export interface IProjectsState {
@@ -20,7 +21,8 @@ export type ProjectsAction =
   | DeleteTask
   | ToggleTask
   | SetProjects
-  | ReorderTask;
+  | ReorderTask
+  | RenameProject;
 
 export interface AddProject {
   type: typeof ADD_PROJECT;
@@ -66,5 +68,13 @@ export interface ReorderTask {
   payload: {
     projectId: string;
     tasks: ITask[];
+  };
+}
+
+export interface RenameProject {
+  type: typeof RENAME_PROJECT;
+  payload: {
+    projectId: string;
+    name: string;
   };
 }

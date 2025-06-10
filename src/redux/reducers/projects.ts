@@ -3,6 +3,7 @@ import {
   ADD_TASK,
   DELETE_PROJECT,
   DELETE_TASK,
+  RENAME_PROJECT,
   REORDER_TASKS,
   SET_PROJECTS,
   TOGGLE_TASK,
@@ -83,6 +84,15 @@ function projectsReducer(
             : project,
         ),
       };
+    case RENAME_PROJECT: {
+      const {projectId, name} = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map(project =>
+          project.id === projectId ? {...project, name} : project,
+        ),
+      };
+    }
     default:
       return state;
   }
