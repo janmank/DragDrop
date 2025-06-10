@@ -14,12 +14,7 @@ const ProjectTile = ({
   deleteProject,
 }: IProjectTileProps) => {
   return (
-    <HStack
-      key={project.id}
-      alignItems="center"
-      justifyContent="space-between"
-      w="100%"
-      px="$2">
+    <HStack alignItems="center" justifyContent="space-between" w="100%" px="$2">
       <Box flex={1} pr="$2">
         <Text
           onPress={() => openProject(project)}
