@@ -9,7 +9,11 @@ import {HomeStackParamList} from '../stacks/AppStack';
 import {ProjectTile} from '../components';
 import {useDispatch, useSelector} from 'react-redux';
 import {selectProjects} from '../redux/selectors/projects';
-import {addProject, deleteProject} from '../redux/actions/projects';
+import {
+  addProject,
+  deleteProject,
+  renameProject,
+} from '../redux/actions/projects';
 import {useProjectsPersistence} from '../hooks';
 import {FlatList} from 'react-native';
 
@@ -41,6 +45,10 @@ const HomeScreen = () => {
     navigation.navigate('TasksListScreen', {project});
   };
 
+  const updateProjectName = (projectId: string, newName: string) => {
+    dispatch(renameProject(projectId, newName));
+  };
+
   return (
     <ScreenWrapper>
       <Box flex={1} p="$4">
@@ -63,6 +71,7 @@ const HomeScreen = () => {
               project={project.item}
               openProject={openProject}
               deleteProject={handleDeleteProject}
+              updateProjectName={updateProjectName}
             />
           )}
           showsVerticalScrollIndicator={false}
