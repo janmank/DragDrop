@@ -1,35 +1,40 @@
 import React, {useState} from 'react';
-import {Box, Input, VStack, InputField} from '@gluestack-ui/themed';
+import {Box, Input, InputField} from '@gluestack-ui/themed';
 import {ScreenWrapper} from '../components/layout';
 import {useNavigation} from '@react-navigation/native';
 import {IProject} from '../interfaces';
-import {CustomButton} from '../components/shared';
+import {CustomButton, EmptyList} from '../components/shared';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {HomeStackParamList} from '../stacks/AppStack';
 import {ProjectTile} from '../components';
+import {useDispatch, useSelector} from 'react-redux';
+import {selectProjects} from '../redux/selectors/projects';
+import {addProject, deleteProject} from '../redux/actions/projects';
+import {useProjectsPersistence} from '../hooks';
+import {FlatList} from 'react-native';
 
 const HomeScreen = () => {
-  const [projects, setProjects] = useState<IProject[]>([]);
   const [projectName, setProjectName] = useState<string>('');
   const navigation = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const projectsRedux = useSelector(selectProjects);
+  const dispatch = useDispatch();
+  useProjectsPersistence();
 
-  const addProject = () => {
+  const handleAddProject = () => {
     if (projectName.trim()) {
-      setProjects([
-        ...projects,
-        {
-          name: projectName,
-          id: Date.now().toString() + Math.random().toString(36).slice(2),
-          completed: false,
-          tasks: [],
-        },
-      ]);
+      const newProject: IProject = {
+        name: projectName,
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        completed: false,
+        tasks: [],
+      };
+      dispatch(addProject(newProject));
       setProjectName('');
     }
   };
 
-  const deleteProject = (id: string) => {
-    setProjects(prev => prev.filter(p => p.id !== id));
+  const handleDeleteProject = (id: string) => {
+    dispatch(deleteProject(id));
   };
 
   const openProject = (project: IProject) => {
@@ -39,25 +44,36 @@ const HomeScreen = () => {
   return (
     <ScreenWrapper>
       <Box flex={1} p="$4">
-        <Input borderColor="#C8C8C8" borderRadius="$lg" mb="$4">
-          <InputField
-            value={projectName}
-            onChangeText={setProjectName}
-            placeholder="Enter project name..."
-          />
-        </Input>
-        <CustomButton title={'Add Project'} onPress={addProject} />
-
-        <VStack space="md" pt="$6">
-          {projects.map(project => (
-            <ProjectTile
-              key={project.id}
-              project={project}
-              openProject={openProject}
-              deleteProject={deleteProject}
+        <Box pb="$4">
+          <Input borderColor="#C8C8C8" borderRadius="$lg" mb="$4">
+            <InputField
+              value={projectName}
+              onChangeText={setProjectName}
+              placeholder="Enter project name..."
             />
-          ))}
-        </VStack>
+          </Input>
+          <CustomButton title={'Add Project'} onPress={handleAddProject} />
+        </Box>
+        <FlatList
+          data={projectsRedux}
+          keyExtractor={project => project.id}
+          renderItem={project => (
+            <ProjectTile
+              key={project.item.id}
+              project={project.item}
+              openProject={openProject}
+              deleteProject={handleDeleteProject}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          // eslint-disable-next-line react-native/no-inline-styles
+          contentContainerStyle={{
+            gap: 16,
+            paddingBottom: 16,
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={<EmptyList title={'projects'} />}
+        />
       </Box>
     </ScreenWrapper>
   );
